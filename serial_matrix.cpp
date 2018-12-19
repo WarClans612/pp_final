@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <opencv2/opencv.hpp>
+#include "image.h"
+#include "load_filter.h"
 using namespace std;
 
 /*----------------------------------------------------------------------------------------
@@ -17,7 +19,9 @@ int dot_product(int* matA, int* matB, int size, int s_width, int s_height, int w
     int answer_sum = 0;
     for(int i = 0; i < size; ++i) {
         for(int j = 0; j < size; ++j) {
-            answer_sum += *(matA+(s_height+i)*width + s_width+j) * *(matB+i*size + j);
+            // assert(((s_height+i)*width + s_width+j) >= 0);
+            // assert(((s_height+i)*width + s_width+j) < a);
+            answer_sum += matA[(s_height+i)*width + s_width+j] * matB[i*size + j];
         }
     }
     return answer_sum;
@@ -31,8 +35,9 @@ int dot_product(int* matA, int* matB, int size, int s_width, int s_height, int w
 int* pad_array(int* input, int width, int height, int padding) {
     int new_width = width+2*padding;
     int new_height = height+2*padding;
-    int* padded_array = (int*)malloc( (new_width)*(new_height)*sizeof(int) );
-    memset (padded_array, 0, (new_width)*(new_height)*sizeof(int));
+    int* padded_array = (int*) malloc(new_width * new_height * sizeof(int));
+    memset (padded_array, 0, new_width * new_height * sizeof(int));
+
     for(int i = padding; i < new_height-padding; ++i) {
         for(int j = padding; j < new_width-padding; ++j) {
             *(padded_array+i*new_width+j) = *(input+(i-padding)*width+(j-padding));
@@ -46,21 +51,24 @@ int* pad_array(int* input, int width, int height, int padding) {
 ----------------------------------------------------------------------------------------*/
 int* conv_layer(int* matA, int* matB, int a_width, int a_height, int b_size, int padding = 0, int step_size = 1) {
     int* inputA;
-    if (padding == 0){
+
+    if (padding == 0) {
         inputA = matA;
     }
     else {
         inputA = pad_array(matA, a_width, a_height, padding);
     }
-    int new_width = (a_width+2*padding);
-    int ans_width = (new_width-b_size)/step_size +1;
-    int new_height = (a_height+2*padding);
+
+    int new_width = a_width + 2*padding;
+    int ans_width = (new_width-b_size)/step_size + 1;
+    int new_height = a_height + 2*padding;
     int ans_height = (new_height-b_size)/step_size + 1;
-    int* answer = (int*)malloc( ans_width*ans_height*sizeof(int) );
-    for(int i = 0; i < ans_height; ++i){
-        for(int j = 0; j < ans_width; ++j){
+    int* answer = (int*) malloc(ans_width * ans_height * sizeof(int));
+
+    for(int i = 0; i < ans_height; ++i) {
+        for(int j = 0; j < ans_width; ++j) {
             int new_val = dot_product(inputA, matB, b_size, j*step_size, i*step_size, new_width);
-            *(answer+(i)*ans_width+(j)) = new_val;
+            answer[i*ans_width + j] = new_val;
         }
     }
 
@@ -71,101 +79,60 @@ int* conv_layer(int* matA, int* matB, int a_width, int a_height, int b_size, int
 }
 
 int main(int argc, char** argv) {
-    int input_matrix[1000000] = {0};
-    for(int i = 0; i < 1000; ++i) {
-        for(int j = 0; j < 1000; ++j) {
-            input_matrix[i*1000+j] = i+1;
-        }
+
+    if(argc < 2) {
+        printf("Usage: ./serial_m <image_filename>\n");
+        return 0;
     }
 
-    int filter_matrix[16] = {
-        1, 2, 3, 4,
-        1, 2, 3, 4,
-        1, 2, 3, 4,
-        1, 2, 3, 4
+    int *image_r, *image_g, *image_b;
+    int image_width, image_height;
+
+    if(read_image(argv[1], &image_r, &image_g, &image_b, &image_width, &image_height) < 0) {
+        printf("Error: can not open %s\n", argv[1]);
+        return -1;
+    }
+
+    //----------------------------------------------------------------------------------------
+    int fil_matrix[9] = {
+        -1, -1, -1,
+        -1,  8, -1,
+        -1, -1, -1
     };
 
-    int answer = dot_product(input_matrix, filter_matrix, 4, 0, 0, 1000);
-    printf("Answer for dot product is %d\n", answer);
-    printf("Corrent answer is 100\n");
+    printf("\nDo convolution\n");
 
-    //----------------------------------------------------------------------------------------
-    int inmatrix[100] = {0};
-    for(int i = 0; i < 10; ++i) {
-        for(int j = 0; j < 10; ++j) {
-            inmatrix[i*10+j] = i+1;
+    int *conv_r, *conv_g, *conv_b;
+    conv_r = conv_layer(image_r, fil_matrix, image_width, image_height, 3, 1);
+    conv_g = conv_layer(image_g, fil_matrix, image_width, image_height, 3, 1);
+    conv_b = conv_layer(image_b, fil_matrix, image_width, image_height, 3, 1);
+
+    printf("Convolution done.\n");
+
+    printf("\n******************************************\n");
+    printf("Display the result in gray scale\n");
+    printf("Use Relu function to make the result clear.\n");
+
+    relu(conv_r, conv_g, conv_b, image_width * image_height);
+    cv::Mat img(image_height, image_width, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    for(int i = 0; i < image_height; i++) {
+        for(int j = 0; j < image_width; j++) {
+            img.at<cv::Vec3b>(i, j)[0] = conv_b[i*image_width + j];
+            img.at<cv::Vec3b>(i, j)[1] = conv_g[i*image_width + j];
+            img.at<cv::Vec3b>(i, j)[2] = conv_r[i*image_width + j];
         }
     }
-    int* pad = pad_array(inmatrix, 10, 10, 2);
-    printf("Answer for array padding:\n");
-    for(int i = 0; i < 14; ++i) {
-        for(int j = 0; j < 14; ++j) {
-            printf("%5d", *(pad+i*14+j));
-        }
-        printf("\n");
-    }
-    free(pad);
-    printf("Correct answer is:\n");
-    printf("    0    0    0    0    0    0    0    0    0    0    0    0    0    0\n\
-    0    0    0    0    0    0    0    0    0    0    0    0    0    0\n\
-    0    0    1    1    1    1    1    1    1    1    1    1    0    0\n\
-    0    0    2    2    2    2    2    2    2    2    2    2    0    0\n\
-    0    0    3    3    3    3    3    3    3    3    3    3    0    0\n\
-    0    0    4    4    4    4    4    4    4    4    4    4    0    0\n\
-    0    0    5    5    5    5    5    5    5    5    5    5    0    0\n\
-    0    0    6    6    6    6    6    6    6    6    6    6    0    0\n\
-    0    0    7    7    7    7    7    7    7    7    7    7    0    0\n\
-    0    0    8    8    8    8    8    8    8    8    8    8    0    0\n\
-    0    0    9    9    9    9    9    9    9    9    9    9    0    0\n\
-    0    0   10   10   10   10   10   10   10   10   10   10    0    0\n\
-    0    0    0    0    0    0    0    0    0    0    0    0    0    0\n\
-    0    0    0    0    0    0    0    0    0    0    0    0    0    0\n");
 
-    //----------------------------------------------------------------------------------------
-    int fil_matrix[16] = {
-        1, 1, 1, 1,
-        1, 1, 1, 1,
-        1, 1, 1, 1,
-        1, 1, 1, 1
-    };
+    // Display the result image
+    cv::namedWindow("view",CV_WINDOW_NORMAL);
+    cv::resizeWindow("view", 1280, 720);
+    cv::imshow("view", img);
+    cv::waitKey(0);
+    cv::destroyAllWindows();
 
-    int* conv = conv_layer(inmatrix, fil_matrix, 10, 10, 4, 2);
-    printf("Answer for convolutional layer:\n");
-    for(int i = 0; i < 11; ++i) {
-        for(int j = 0; j < 11; ++j) {
-            printf("%5d", *(conv+i*11+j));
-        }
-        printf("\n");
-    }
-    free(conv);
-    printf("Correct answer is:\n");
-    printf("    6    9   12   12   12   12   12   12   12    9    6\n\
-   12   18   24   24   24   24   24   24   24   18   12\n\
-   20   30   40   40   40   40   40   40   40   30   20\n\
-   28   42   56   56   56   56   56   56   56   42   28\n\
-   36   54   72   72   72   72   72   72   72   54   36\n\
-   44   66   88   88   88   88   88   88   88   66   44\n\
-   52   78  104  104  104  104  104  104  104   78   52\n\
-   60   90  120  120  120  120  120  120  120   90   60\n\
-   68  102  136  136  136  136  136  136  136  102   68\n\
-   54   81  108  108  108  108  108  108  108   81   54\n\
-   38   57   76   76   76   76   76   76   76   57   38\n");
-
-    //----------------------------------------------------------------------------------------
-    conv = conv_layer(inmatrix, fil_matrix, 10, 10, 4, 2, 3);
-    printf("Answer for convolutional layer:\n");
-    for(int i = 0; i < 4; ++i) {
-        for(int j = 0; j < 4; ++j) {
-            printf("%5d", *(conv+i*4+j));
-        }
-        printf("\n");
-    }
-    free(conv);
-    printf("Correct answer is:\n");
-    printf("    6   12   12    9\n\
-   28   56   56   42\n\
-   52  104  104   78\n\
-   54  108  108   81\n");
-    
+    free_image(&image_r, &image_g, &image_b);
+    free_image(&conv_r, &conv_g, &conv_b);
+    printf("\ndone.\n");
     return 0;
 }
