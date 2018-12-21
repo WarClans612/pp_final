@@ -26,9 +26,9 @@ int read_image(char *filename, int **r, int **g, int **b, int *width, int *heigh
     image_size = image.cols * image.rows;
 
 
-    *r = (int *) malloc(image_size * sizeof(int));
-    *g = (int *) malloc(image_size * sizeof(int));
-    *b = (int *) malloc(image_size * sizeof(int));
+    *r = new int [image_size * sizeof(int)];
+    *g = new int [image_size * sizeof(int)];
+    *b = new int [image_size * sizeof(int)];
 
     for(int i = 0; i < *height; i++)
     {
@@ -58,10 +58,34 @@ void relu(int *r, int *g, int *b, int image_size)
     return;
 }
 
-void free_image(int **r, int **g, int **b)
+void show_image(int *r, int *g, int *b, int width, int height, int use_relu)
 {
-    free(*r);
-    free(*g);
-    free(*b);
+    if(use_relu)
+        relu(r, g, b, width * height);
+
+    cv::Mat result_image(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    for(int i = 0; i < height; i++) {
+        for(int j = 0; j < width; j++) {
+            result_image.at<cv::Vec3b>(i, j)[0] = b[i*width + j];
+            result_image.at<cv::Vec3b>(i, j)[1] = g[i*width + j];
+            result_image.at<cv::Vec3b>(i, j)[2] = r[i*width + j];
+        }
+    }
+
+    // Display the result image
+    cv::namedWindow("view",CV_WINDOW_NORMAL);
+    cv::resizeWindow("view", 1280, 720);
+    cv::imshow("view", result_image);
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+    return;
+}
+
+void free_image(int *r, int *g, int *b)
+{
+    delete [] r;
+    delete [] g;
+    delete [] b;
     return;
 }

@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
-project( DisplayImage )
+project( ParallelConvolutionLayer )
 
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-add_executable( serial_m serial_matrix.cpp image.cpp)
+
+add_executable( serial_m serial_matrix.cpp image.cpp filter.cpp )
 target_link_libraries( serial_m ${OpenCV_LIBS} )
+
+# add_executable( thread_m thread_matrix.cpp image.cpp filter.cpp )
+# target_compile_options( thread_m PUBLIC "-pthread")
+# target_link_libraries( thread_m ${OpenCV_LIBS} )
