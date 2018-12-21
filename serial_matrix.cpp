@@ -97,8 +97,8 @@ int main(int argc, char** argv) {
     int **fil_matrix;
     load_filter(argv[2], &num_filters, &fil_matrix, &fil_size);
 
-    printf("******************************************\n");
-    printf("\nDo convolution\n");
+    printf("\n******************************************\n");
+    printf("Do convolution\n");
 
     int *conv_r, *conv_g, *conv_b;
     for(int i = 0; i < num_filters; i++)

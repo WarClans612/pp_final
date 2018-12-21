@@ -3,6 +3,12 @@
 #include <cstdlib>
 using namespace std;
 
+/*--------------------------------------------------------------------------------------
+    Allocate a 2D-array: filter_mat, and a 1D-array: filter_size
+    which filter_mat[i] is i-th filter and filter_size[i] is the dimension of the filter
+    num_filters is set to M, M is read from the file
+    Need to call free_filter(num_filters, filter_mat, filter_size) to free the memory.
+----------------------------------------------------------------------------------------*/
 void load_filter(const char *filename, int *num_filters, int ***filter_mat, int **filter_size)
 {
     ifstream inFile(filename);
@@ -23,10 +29,7 @@ void load_filter(const char *filename, int *num_filters, int ***filter_mat, int 
         (*filter_mat)[i] = new int [(*filter_size)[i] * sizeof(int)];
 
         for(int j = 0; j < (*filter_size)[i] * (*filter_size)[i]; j++)
-        {
             inFile >> (*filter_mat)[i][j];
-            printf("%d\n", (*filter_mat)[i][j]);
-        }
     }
 
     inFile.close();

@@ -3,6 +3,11 @@
 #include "image.h"
 using namespace cv;
 
+/*--------------------------------------------------------------------------------------
+    Allocate three 1D array: r, g, b which store the RGB value of the image.
+    Need to call free_image(r, g, b) to free the memory.
+    The width & height value of the image will assign to the parameter width & height
+----------------------------------------------------------------------------------------*/
 int read_image(char *filename, int **r, int **g, int **b, int *width, int *height)
 {
     Mat image;
@@ -58,6 +63,10 @@ void relu(int *r, int *g, int *b, int image_size)
     return;
 }
 
+/*--------------------------------------------------------------------------------------
+    Default will call relu function before display the image. To not use relu,
+    assign use_relu = NO_RELU (NO_RELU is define in image.h)
+----------------------------------------------------------------------------------------*/
 void show_image(int *r, int *g, int *b, int width, int height, int use_relu)
 {
     if(use_relu)
