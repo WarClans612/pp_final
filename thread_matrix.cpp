@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <omp.h>
 #include <opencv2/opencv.hpp>
 #include <sys/time.h>
 #include "image.h"
 #include "filter.h"
 using namespace std;
+
+static int num_threads;
 
 /*----------------------------------------------------------------------------------------
     Matrix dot product calculation
@@ -82,13 +85,20 @@ int main(int argc, char** argv) {
 
     int show_result = 0;
 
-    if(argc < 3) {
-        printf("Usage: ./serial_m <image_filename> <filter_filename> [show_result: 1 | 0]\n");
+    if(argc < 4) {
+        printf("Usage: ./serial_m <image_filename> <filter_filename> <number_of_threads> [show_result: 1 | 0]\n");
         return 0;
     }
 
-    if(argc >= 4)
-        show_result = atoi(argv[3]);
+    if(argc >= 5)
+        show_result = atoi(argv[4]);
+
+    num_threads = atoi(argv[3]);
+    omp_set_num_threads(num_threads);
+    printf("\n******************************************\n");
+    printf("Using %d cores with OpenMP\n", num_threads);
+    printf("******************************************\n");
+
 
     int *image_r, *image_g, *image_b;
     int image_width, image_height;
@@ -116,6 +126,7 @@ int main(int argc, char** argv) {
     conv_g = new int* [num_filters];
     conv_b = new int* [num_filters];
 
+    #pragma omp parallel for
     for(int i = 0; i < num_filters; i++)
     {
         conv_r[i] = conv_layer(image_r, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);

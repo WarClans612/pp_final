@@ -87,7 +87,6 @@ void show_image(int *r, int *g, int *b, int width, int height, int use_relu)
     cv::resizeWindow("view", 1280, 720);
     cv::imshow("view", result_image);
     cv::waitKey(0);
-    cv::destroyAllWindows();
     return;
 }
 
