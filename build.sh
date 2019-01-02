@@ -10,5 +10,6 @@ fi
 cd build
 cmake ..
 make
-cp serial_m ../
+
+cp cuda_m ../
 cd ..
