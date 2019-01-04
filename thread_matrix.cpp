@@ -38,7 +38,7 @@ int* pad_array(int* input, int width, int height, int padding) {
     int new_width = width+2*padding;
     int new_height = height+2*padding;
     int* padded_array = new int [new_width * new_height * sizeof(int)];
-    memset (padded_array, 0, new_width * new_height * sizeof(int));
+    memset(padded_array, 0, new_width * new_height * sizeof(int));
 
     for(int i = padding; i < new_height-padding; ++i) {
         for(int j = padding; j < new_width-padding; ++j) {
@@ -67,11 +67,9 @@ int* conv_layer(int* matA, int* matB, int a_width, int a_height, int b_size, int
     int ans_height = (new_height-b_size)/step_size + 1;
     int* answer = new int [ans_width * ans_height * sizeof(int)];
 
-    int new_val;
     for(int i = 0; i < ans_height; ++i) {
         for(int j = 0; j < ans_width; ++j) {
-            new_val = dot_product(inputA, matB, b_size, j*step_size, i*step_size, new_width);
-            answer[i*ans_width + j] = new_val;
+            answer[i*ans_width + j] = dot_product(inputA, matB, b_size, j*step_size, i*step_size, new_width);
         }
     }
 
@@ -83,22 +81,13 @@ int* conv_layer(int* matA, int* matB, int a_width, int a_height, int b_size, int
 
 int main(int argc, char** argv) {
 
-    int show_result = 0;
-
     if(argc < 4) {
-        printf("Usage: ./serial_m <image_filename> <filter_filename> <number_of_threads> [show_result: 1 | 0]\n");
+        printf("Usage: ./thread_m <image_filename> <filter_filename> <number_of_threads>\n");
         return 0;
     }
 
-    if(argc >= 5)
-        show_result = atoi(argv[4]);
-
     num_threads = atoi(argv[3]);
     omp_set_num_threads(num_threads);
-    printf("\n******************************************\n");
-    printf("Using %d cores with OpenMP\n", num_threads);
-    printf("******************************************\n");
-
 
     int *image_r, *image_g, *image_b;
     int image_width, image_height;
@@ -114,53 +103,32 @@ int main(int argc, char** argv) {
     int **fil_matrix;
     load_filter(argv[2], &num_filters, &fil_matrix, &fil_size);
 
-    struct timeval t_begin, t_end;
-
     printf("\n******************************************\n");
     printf("Do convolution\n");
 
-    gettimeofday(&t_begin, 0);
+    // char filename[256];
+    int *conv_r, *conv_g, *conv_b;
 
-    int **conv_r, **conv_g, **conv_b;
-    conv_r = new int* [num_filters];
-    conv_g = new int* [num_filters];
-    conv_b = new int* [num_filters];
-
-    #pragma omp parallel for
+    // #pragma omp parallel for private(conv_r, conv_g, conv_b, filename)
+    #pragma omp parallel for private(conv_r, conv_g, conv_b)
     for(int i = 0; i < num_filters; i++)
     {
-        conv_r[i] = conv_layer(image_r, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
-        conv_g[i] = conv_layer(image_g, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
-        conv_b[i] = conv_layer(image_b, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
-    }
+        conv_r = conv_layer(image_r, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
+        conv_g = conv_layer(image_g, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
+        conv_b = conv_layer(image_b, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
 
-    gettimeofday(&t_end, 0);
+        // sprintf(filename, "thread_out%d.jpg", i);
+        // write_image(filename, conv_r[i], conv_g[i], conv_b[i], image_width, image_height);
+        free_image(conv_r, conv_g, conv_b);
+    }
 
     printf("Convolution done.\n");
     printf("******************************************\n");
 
     //-----------------------------------------------------
-    for(int i = 0; i < num_filters; i++)
-    {
-        printf("filter %d:\n", i);
-        print_filter(fil_matrix[i], fil_size[i]);
-        if(show_result)
-            show_image(conv_r[i], conv_g[i], conv_b[i], image_width, image_height);
-        free_image(conv_r[i], conv_g[i], conv_b[i]);
-    }
-
-    if(show_result)
-        cv::destroyAllWindows();
-
-    delete [] conv_r;
-    delete [] conv_g;
-    delete [] conv_b;
+    free_image(image_r, image_g, image_b);
     free_filter(num_filters, fil_matrix, fil_size);
-    //-----------------------------------------------------
 
-    int sec = t_end.tv_sec - t_begin.tv_sec;
-    int usec = t_end.tv_usec - t_begin.tv_usec;
-    printf("\nSpend %f sec\n", (sec*1000+(usec/1000.0))/1000);
     printf("done.\n");
     return 0;
 }
