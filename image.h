@@ -6,6 +6,7 @@
 
 int read_image(char *filename, int **r, int **g, int **b, int *width, int *height);
 void relu(int *r, int *g, int *b, int image_size);
+void write_image(char *filename, int *r, int *g, int *b, int width, int height);
 void show_image(int *r, int *g, int *b, int width, int height, int use_relu = USE_RELU);
 void free_image(int *r, int *g, int *b);
 
