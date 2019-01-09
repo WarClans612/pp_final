@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project( ParallelConvolutionLayer )
 
 find_package( OpenCV REQUIRED )
+find_package(OpenMP REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 find_package(CUDA REQUIRED)
@@ -13,10 +14,6 @@ set(CMAKE_CXX_STANDARD 11)
 cuda_add_executable( cuda_m convolution.cu image.cpp filter.cpp )
 target_link_libraries( cuda_m ${OpenCV_LIBS} )
 
-# add_executable( thread_m thread_matrix.cpp image.cpp filter.cpp )
-# target_compile_options( thread_m PUBLIC "-pthread")
-# target_link_libraries( thread_m ${OpenCV_LIBS} )
-
-
-
-
+add_executable( thread_m thread_matrix.cpp image.cpp filter.cpp )
+target_compile_options( thread_m PUBLIC ${OpenMP_CXX_FLAGS} )
+target_link_libraries( thread_m ${OpenCV_LIBS} ${OpenMP_CXX_FLAGS})

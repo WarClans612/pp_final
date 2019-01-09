@@ -51,6 +51,25 @@ int read_image(char *filename, int **r, int **g, int **b, int *width, int *heigh
     return 0;
 }
 
+void write_image(char *filename, int *r, int *g, int *b, int width, int height)
+{
+    relu(r, g, b, width * height);
+    cv::Mat result_image(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    for(int i = 0; i < height; i++)
+    {
+        for(int j = 0; j < width; j++)
+        {
+            result_image.at<cv::Vec3b>(i, j)[0] = b[i*width + j];
+            result_image.at<cv::Vec3b>(i, j)[1] = g[i*width + j];
+            result_image.at<cv::Vec3b>(i, j)[2] = r[i*width + j];
+        }
+    }
+
+    cv::imwrite(filename, result_image);
+    return;
+}
+
 void relu(int *r, int *g, int *b, int image_size)
 {
     for(int i = 0; i < image_size; i++)
@@ -87,7 +106,6 @@ void show_image(int *r, int *g, int *b, int width, int height, int use_relu)
     cv::resizeWindow("view", 1280, 720);
     cv::imshow("view", result_image);
     cv::waitKey(0);
-    cv::destroyAllWindows();
     return;
 }
 
