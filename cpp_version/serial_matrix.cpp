@@ -109,8 +109,8 @@ int main(int argc, char** argv) {
         conv_g = conv_layer(image_g, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
         conv_b = conv_layer(image_b, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
 
-         sprintf(filename, "serial_out%d.jpg", i);
-         write_image(filename, conv_r, conv_g, conv_b, image_width, image_height);
+         //sprintf(filename, "serial_out%d.jpg", i);
+         //write_image(filename, conv_r, conv_g, conv_b, image_width, image_height);
         free_image(conv_r, conv_g, conv_b);
     }
 

@@ -7,7 +7,7 @@
 #include "filter.h"
 
 #define TILE_WIDTH 32
-#define TILE_HEIGHT 16
+#define TILE_HEIGHT 32
 #define FSize 256
 //void convolution(int *InputImage,int width,int height,int *filter,int filterWidth,,int padding,int *result);
 using namespace std;
@@ -160,7 +160,7 @@ int * sharecntconvolution(int *OriginImage,int width,int height,int *filter,int 
     int paddingImageSize=(width+padding*2)*(height+padding*2)*sizeof(int);
     int filterSize=filterWidth*filterWidth*sizeof(int);
     int feathreMapSize;
-    cout<<"in share+constant convolution"<<endl;
+    //cout<<"in share+constant convolution"<<endl;
     featureMapHeight=height; //feature map's width = origin width-featureWidth+1
     featureMapWidth=width;
     feathreMapSize=featureMapHeight*featureMapWidth*sizeof(int);
@@ -168,7 +168,7 @@ int * sharecntconvolution(int *OriginImage,int width,int height,int *filter,int 
     featureMap= new int[feathreMapSize];
     /*for(int i=0;i<width*height;i++)
     {
-        cout<<i<<" "<<InputImage[i]<<endl;
+        //cout<<i<<" "<<InputImage[i]<<endl;
     }*/
     cudaMalloc(&InputImaged,paddingImageSize);
     cudaMemcpy(InputImaged,InputImage,paddingImageSize,cudaMemcpyHostToDevice);
@@ -177,12 +177,12 @@ int * sharecntconvolution(int *OriginImage,int width,int height,int *filter,int 
 
     cudaMalloc(&featureMapd,feathreMapSize);
 
-    cout<<"in"<<endl;
+    //cout<<"in"<<endl;
     // determine which blocks
     x=(featureMapWidth+TILE_WIDTH-1)/TILE_WIDTH;
     y=(featureMapHeight+TILE_HEIGHT-1)/TILE_HEIGHT;
 
-    cout<<x<<" "<<y<<endl;
+    //cout<<x<<" "<<y<<endl;
     dim3 dimGrid(x,y);
     dim3 dimBlock(TILE_WIDTH,TILE_HEIGHT);
 
@@ -194,15 +194,16 @@ int * sharecntconvolution(int *OriginImage,int width,int height,int *filter,int 
     cudaMemcpy(featureMap,featureMapd,feathreMapSize,cudaMemcpyDeviceToHost);
     /*for(int i=0;i<featureMapHeight*featureMapWidth;i++)
     {
-        cout<<i<<" "<<featureMap[i]<<endl;
+        //cout<<i<<" "<<featureMap[i]<<endl;
     }*/
     cudaFree(featureMapd);cudaFree(InputImaged);//cudaFree(filterd);
+    delete [] InputImage;
 
     return featureMap;
 
     /*for(int i=0;i<width*height;i++)
     {
-        cout<<i<<" "<<result[i]<<endl;
+        //cout<<i<<" "<<result[i]<<endl;
     }*/
 }
 int *cntconvolution(int *OriginImage,int width,int height,int *filter,int filterWidth,int padding,int *result)
@@ -213,7 +214,7 @@ int *cntconvolution(int *OriginImage,int width,int height,int *filter,int filter
     int paddingImageSize=(width+padding*2)*(height+padding*2)*sizeof(int);
     int filterSize=filterWidth*filterWidth*sizeof(int);
     int feathreMapSize;
-    cout<<"in constant convolution"<<endl;
+    //cout<<"in constant convolution"<<endl;
     featureMapHeight=height; //feature map's width = origin width-featureWidth+1
     featureMapWidth=width;
     feathreMapSize=featureMapHeight*featureMapWidth*sizeof(int);
@@ -221,7 +222,7 @@ int *cntconvolution(int *OriginImage,int width,int height,int *filter,int filter
     featureMap= new int[feathreMapSize];
     /*for(int i=0;i<width*height;i++)
     {
-        cout<<i<<" "<<InputImage[i]<<endl;
+        //cout<<i<<" "<<InputImage[i]<<endl;
     }*/
     cudaMalloc(&InputImaged,paddingImageSize);
     cudaMemcpy(InputImaged,InputImage,paddingImageSize,cudaMemcpyHostToDevice);
@@ -230,12 +231,12 @@ int *cntconvolution(int *OriginImage,int width,int height,int *filter,int filter
 
     cudaMalloc(&featureMapd,feathreMapSize);
 
-    cout<<"in"<<endl;
+    //cout<<"in"<<endl;
     // determine which blocks
     x=(featureMapWidth+TILE_WIDTH-1)/TILE_WIDTH;
     y=(featureMapHeight+TILE_HEIGHT-1)/TILE_HEIGHT;
 
-    cout<<x<<" "<<y<<endl;
+    //cout<<x<<" "<<y<<endl;
     dim3 dimGrid(x,y);
     dim3 dimBlock(TILE_WIDTH,TILE_HEIGHT);
 
@@ -245,9 +246,10 @@ int *cntconvolution(int *OriginImage,int width,int height,int *filter,int filter
     cudaMemcpy(featureMap,featureMapd,feathreMapSize,cudaMemcpyDeviceToHost);
     /*for(int i=0;i<featureMapHeight*featureMapWidth;i++)
     {
-        cout<<i<<" "<<featureMap[i]<<endl;
+        //cout<<i<<" "<<featureMap[i]<<endl;
     }*/
     cudaFree(featureMapd);cudaFree(InputImaged);//cudaFree(filterd);
+    delete [] InputImage;
 
     return featureMap;
 }
@@ -260,7 +262,7 @@ int * convolution(int *OriginImage,int width,int height,int *filter,int filterWi
     int paddingImageSize=(width+padding*2)*(height+padding*2)*sizeof(int);
     int filterSize=filterWidth*filterWidth*sizeof(int);
     int feathreMapSize;
-    cout<<"in normal convolution"<<endl;
+    //cout<<"in normal convolution"<<endl;
     featureMapHeight=height; //feature map's width = origin width-featureWidth+1
     featureMapWidth=width;
     feathreMapSize=featureMapHeight*featureMapWidth*sizeof(int);
@@ -268,7 +270,7 @@ int * convolution(int *OriginImage,int width,int height,int *filter,int filterWi
     featureMap= new int[feathreMapSize];
     /*for(int i=0;i<width*height;i++)
     {
-        cout<<i<<" "<<InputImage[i]<<endl;
+        //cout<<i<<" "<<InputImage[i]<<endl;
     }*/
     cudaMalloc(&InputImaged,paddingImageSize);
     cudaMemcpy(InputImaged,InputImage,paddingImageSize,cudaMemcpyHostToDevice);
@@ -278,12 +280,12 @@ int * convolution(int *OriginImage,int width,int height,int *filter,int filterWi
 
     cudaMalloc(&featureMapd,feathreMapSize);
 
-    cout<<"in"<<endl;
+    //cout<<"in"<<endl;
     // determine which blocks
     x=(featureMapWidth+TILE_WIDTH-1)/TILE_WIDTH;
     y=(featureMapHeight+TILE_HEIGHT-1)/TILE_HEIGHT;
 
-    cout<<x<<" "<<y<<endl;
+    //cout<<x<<" "<<y<<endl;
     dim3 dimGrid(x,y);
     dim3 dimBlock(TILE_WIDTH,TILE_HEIGHT);
 
@@ -293,15 +295,16 @@ int * convolution(int *OriginImage,int width,int height,int *filter,int filterWi
     cudaMemcpy(featureMap,featureMapd,feathreMapSize,cudaMemcpyDeviceToHost);
     /*for(int i=0;i<featureMapHeight*featureMapWidth;i++)
     {
-        cout<<i<<" "<<featureMap[i]<<endl;
+        //cout<<i<<" "<<featureMap[i]<<endl;
     }*/
     cudaFree(featureMapd);cudaFree(InputImaged);cudaFree(filterd);
+    delete [] InputImage;
 
     return featureMap;
 
     /*for(int i=0;i<width*height;i++)
     {
-        cout<<i<<" "<<result[i]<<endl;
+        //cout<<i<<" "<<result[i]<<endl;
     }*/
 }
 
@@ -313,7 +316,7 @@ int * shareconvolution(int *OriginImage,int width,int height,int *filter,int fil
     int paddingImageSize=(width+padding*2)*(height+padding*2)*sizeof(int);
     int filterSize=filterWidth*filterWidth*sizeof(int);
     int feathreMapSize;
-    cout<<"in share convolution"<<endl;
+    //cout<<"in share convolution"<<endl;
     featureMapHeight=height; //feature map's width = origin width-featureWidth+1
     featureMapWidth=width;
     feathreMapSize=featureMapHeight*featureMapWidth*sizeof(int);
@@ -321,7 +324,7 @@ int * shareconvolution(int *OriginImage,int width,int height,int *filter,int fil
     featureMap= new int[feathreMapSize];
     /*for(int i=0;i<width*height;i++)
     {
-        cout<<i<<" "<<InputImage[i]<<endl;
+        //cout<<i<<" "<<InputImage[i]<<endl;
     }*/
     cudaMalloc(&InputImaged,paddingImageSize);
     cudaMemcpy(InputImaged,InputImage,paddingImageSize,cudaMemcpyHostToDevice);
@@ -331,12 +334,12 @@ int * shareconvolution(int *OriginImage,int width,int height,int *filter,int fil
 
     cudaMalloc(&featureMapd,feathreMapSize);
 
-    cout<<"in"<<endl;
+    //cout<<"in"<<endl;
     // determine which blocks
     x=(featureMapWidth+TILE_WIDTH-1)/TILE_WIDTH;
     y=(featureMapHeight+TILE_HEIGHT-1)/TILE_HEIGHT;
 
-    cout<<x<<" "<<y<<endl;
+    //cout<<x<<" "<<y<<endl;
     dim3 dimGrid(x,y);
     dim3 dimBlock(TILE_WIDTH,TILE_HEIGHT);
 
@@ -347,9 +350,10 @@ int * shareconvolution(int *OriginImage,int width,int height,int *filter,int fil
     cudaMemcpy(featureMap,featureMapd,feathreMapSize,cudaMemcpyDeviceToHost);
     /*for(int i=0;i<featureMapHeight*featureMapWidth;i++)
     {
-        cout<<i<<" "<<featureMap[i]<<endl;
+        //cout<<i<<" "<<featureMap[i]<<endl;
     }*/
     cudaFree(featureMapd);cudaFree(InputImaged);cudaFree(filterd);
+    delete [] InputImage;
 
     return featureMap;
 }
@@ -362,7 +366,7 @@ int * share2convolution(int *OriginImage,int width,int height,int *filter,int fi
     int paddingImageSize=(width+padding*2)*(height+padding*2)*sizeof(int);
     int filterSize=filterWidth*filterWidth*sizeof(int);
     int feathreMapSize;
-    cout<<"in share convolution ver.2"<<endl;
+    //cout<<"in share convolution ver.2"<<endl;
     featureMapHeight=height; //feature map's width = origin width-featureWidth+1
     featureMapWidth=width;
     feathreMapSize=featureMapHeight*featureMapWidth*sizeof(int);
@@ -378,12 +382,12 @@ int * share2convolution(int *OriginImage,int width,int height,int *filter,int fi
 
     cudaMalloc(&featureMapd,feathreMapSize);
 
-    cout<<"in"<<endl;
+    //cout<<"in"<<endl;
     // determine which blocks
     x=(featureMapWidth+TILE_WIDTH-1)/TILE_WIDTH;
     y=(featureMapHeight+TILE_HEIGHT-1)/TILE_HEIGHT;
 
-    cout<<x<<" "<<y<<endl;
+    //cout<<x<<" "<<y<<endl;
     dim3 dimGrid(x,y);
     dim3 dimBlock(TILE_WIDTH,TILE_HEIGHT);
 
@@ -394,9 +398,10 @@ int * share2convolution(int *OriginImage,int width,int height,int *filter,int fi
     cudaMemcpy(featureMap,featureMapd,feathreMapSize,cudaMemcpyDeviceToHost);
     /*for(int i=0;i<featureMapHeight*featureMapWidth;i++)
     {
-        cout<<i<<" "<<featureMap[i]<<endl;
+        //cout<<i<<" "<<featureMap[i]<<endl;
     }*/
     cudaFree(featureMapd);cudaFree(InputImaged);cudaFree(filterd);
+    delete [] InputImage;
 
     return featureMap;
 }
@@ -427,17 +432,18 @@ int main(int argc, char *argv[])
     printf("Do convolution\n");
 
     int *conv_r, *conv_g, *conv_b;
+    for (int k = 0; k < 100; ++k) 
     if(mode==0)
     {
         for(int i = 0; i < num_filters; i++)
         {
-            printf("filter %d:\n", i);
-            print_filter(fil_matrix[i], fil_size[i]);
+            //printf("filter %d:\n", i);
+            //print_filter(fil_matrix[i], fil_size[i]);
     
             conv_r=convolution(image_r,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_r);
             conv_g=convolution(image_g,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_g);
             conv_b=convolution(image_b,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_b);
-            show_image(conv_r, conv_g, conv_b, image_width, image_height);
+            //show_image(conv_r, conv_g, conv_b, image_width, image_height);
     
             free_image(conv_r, conv_g, conv_b);
         }
@@ -446,13 +452,13 @@ int main(int argc, char *argv[])
     {
         for(int i = 0; i < num_filters; i++)
         {
-            printf("filter %d:\n", i);
-            print_filter(fil_matrix[i], fil_size[i]);
+            //printf("filter %d:\n", i);
+            //print_filter(fil_matrix[i], fil_size[i]);
     
             conv_r=cntconvolution(image_r,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_r);
             conv_g=cntconvolution(image_g,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_g);
             conv_b=cntconvolution(image_b,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_b);
-            show_image(conv_r, conv_g, conv_b, image_width, image_height);
+            //show_image(conv_r, conv_g, conv_b, image_width, image_height);
     
             free_image(conv_r, conv_g, conv_b);
         }
@@ -461,13 +467,13 @@ int main(int argc, char *argv[])
     {
         for(int i = 0; i < num_filters; i++)
         {
-            printf("filter %d:\n", i);
-            print_filter(fil_matrix[i], fil_size[i]);
+            //printf("filter %d:\n", i);
+            //print_filter(fil_matrix[i], fil_size[i]);
     
             conv_r=shareconvolution(image_r,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_r);
             conv_g=shareconvolution(image_g,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_g);
             conv_b=shareconvolution(image_b,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_b);
-            show_image(conv_r, conv_g, conv_b, image_width, image_height);
+            //show_image(conv_r, conv_g, conv_b, image_width, image_height);
     
             free_image(conv_r, conv_g, conv_b);
         }
@@ -476,13 +482,13 @@ int main(int argc, char *argv[])
     {
         for(int i = 0; i < num_filters; i++)
         {
-            printf("filter %d:\n", i);
-            print_filter(fil_matrix[i], fil_size[i]);
+            //printf("filter %d:\n", i);
+            //print_filter(fil_matrix[i], fil_size[i]);
     
             conv_r=sharecntconvolution(image_r,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_r);
             conv_g=sharecntconvolution(image_g,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_g);
             conv_b=sharecntconvolution(image_b,image_width,image_height,fil_matrix[i],fil_size[i],(fil_size[i]-1)/2,conv_b);
-            show_image(conv_r, conv_g, conv_b, image_width, image_height);
+            //show_image(conv_r, conv_g, conv_b, image_width, image_height);
     
             free_image(conv_r, conv_g, conv_b);
         }

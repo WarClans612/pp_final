@@ -67,6 +67,7 @@ int* conv_layer(int* matA, int* matB, int a_width, int a_height, int b_size, int
     int ans_height = (new_height-b_size)/step_size + 1;
     int* answer = new int [ans_width * ans_height * sizeof(int)];
 
+    #pragma omp parallel for
     for(int i = 0; i < ans_height; ++i) {
         for(int j = 0; j < ans_width; ++j) {
             answer[i*ans_width + j] = dot_product(inputA, matB, b_size, j*step_size, i*step_size, new_width);
@@ -109,7 +110,7 @@ int main(int argc, char** argv) {
     char filename[256];
     int *conv_r, *conv_g, *conv_b;
 
-    #pragma omp parallel for private(conv_r, conv_g, conv_b, filename)
+    //#pragma omp parallel for private(conv_r, conv_g, conv_b, filename)
     //#pragma omp parallel for private(conv_r, conv_g, conv_b)
     for(int i = 0; i < num_filters; i++)
     {
@@ -117,8 +118,8 @@ int main(int argc, char** argv) {
         conv_g = conv_layer(image_g, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
         conv_b = conv_layer(image_b, fil_matrix[i], image_width, image_height, fil_size[i], (fil_size[i]-1) / 2);
 
-        sprintf(filename, "thread_out%d.jpg", i);
-        write_image(filename, conv_r, conv_g, conv_b, image_width, image_height);
+        //sprintf(filename, "thread_out%d.jpg", i);
+        //write_image(filename, conv_r, conv_g, conv_b, image_width, image_height);
         free_image(conv_r, conv_g, conv_b);
     }
 
