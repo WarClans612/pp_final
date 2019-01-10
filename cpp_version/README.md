@@ -9,7 +9,7 @@ This project uses cmake to build. You can use `build.sh` to compile in simple wa
 ./build.sh
 ```
 
-After compiling, you can find the serial program named `serial_m` at current directory.
+After compiling, you can find the serial program named `serial_m` and `thread_m` at current directory.
 
 ## Run
 ```bash
