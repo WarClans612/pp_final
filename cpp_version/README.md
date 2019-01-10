@@ -16,6 +16,10 @@ After compiling, you can find the serial program named `serial_m` at current dir
 ./serial_m <image_filename> <filter_filename>
 ```
 
+```bash
+./thread_m <image_filename> <filter_filename> <num_of_thread>
+```
+
 *image_filename* is the image file you want to run
 
 *filter_filename* is the filter file, the file format is:
@@ -28,5 +32,7 @@ N2
 n21 n22 n23 ...
 ...
 ```
+
+*num_of_thread* is the number of wanted thread to be run on
 
 You can read `filter.txt` as the example.
