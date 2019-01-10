@@ -1,6 +1,6 @@
 Cuda Version
 ```
- Usage:   ./serial_m <image_filename> <filter_filename> <mode> 
+ Usage:   ./cuda_m <image_filename> <filter_filename> <mode> 
 ```
 mode==0時 為一般的GPU版本的convolution，圖片與filter都在global
 mode==1時 與mode0相比，將filter搬到 constant memory，以求加速
